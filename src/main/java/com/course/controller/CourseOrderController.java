@@ -2,6 +2,7 @@ package com.course.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.course.common.result.Result;
+import com.course.dto.CourseVo;
 import com.course.dto.OrderCreateRequest;
 import com.course.dto.OrderQueryRequest;
 import com.course.dto.OrderVo;
@@ -11,7 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "订单管理")
 @RestController
@@ -66,6 +70,14 @@ public class CourseOrderController {
         Long usrId = SecurityUtils.getCurrentUsrId();
         boolean b = courseOrderService.hasPurchased(usrId, courseId);
         return Result.success(b);
+    }
+
+    @Operation(summary = "查询订单列表")
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result<Page<OrderVo>> queryOrderList(OrderQueryRequest request){
+        Page<OrderVo> orderVos = courseOrderService.queryOrderList(request);
+        return Result.success(orderVos);
     }
 
 }

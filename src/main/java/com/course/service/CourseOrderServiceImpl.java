@@ -15,6 +15,7 @@ import com.course.entity.CourseOrder;
 import com.course.entity.User;
 import com.course.mapper.CourseMapper;
 import com.course.mapper.CourseOrderMapper;
+import com.course.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -35,6 +37,7 @@ public class CourseOrderServiceImpl implements CourseOrderService{
     private final RedisTemplate<String,Object> redisTemplate;
 
     private static final String ORDER_LOCK_KEY = "order:lock:";
+    private final UserMapper userMapper;
 
     //创建订单
     @Override
@@ -185,6 +188,22 @@ public class CourseOrderServiceImpl implements CourseOrderService{
                 .eq(CourseOrder::getUserId,userId)
                 .eq(CourseOrder::getStatus, OrderStatus.PAID);
         return orderMapper.selectCount(wrapper) > 0;
+    }
+
+    //查询订单列表
+    @Override
+    public Page<OrderVo> queryOrderList(OrderQueryRequest request) {
+        Page<CourseOrder> page = new Page<>(request.getPageNum(),request.getPageSize());
+        LambdaQueryWrapper<CourseOrder> wrapper =new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(CourseOrder::getCreateTime);
+        if (request.getStatus()!=null){
+            wrapper.eq(CourseOrder::getStatus,request.getStatus());
+        }
+        Page<CourseOrder> courseOrderPage = orderMapper.selectPage(page, wrapper);
+        Page<OrderVo> voPage = new Page<>();
+        BeanUtil.copyProperties(courseOrderPage,voPage,"records");
+        voPage.setRecords(courseOrderPage.getRecords().stream().map(this::convertToVo).toList());
+        return voPage;
     }
 
     //生成订单号
