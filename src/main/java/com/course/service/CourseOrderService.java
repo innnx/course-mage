@@ -5,6 +5,8 @@ import com.course.dto.OrderCreateRequest;
 import com.course.dto.OrderQueryRequest;
 import com.course.dto.OrderVo;
 
+import java.util.List;
+
 public interface CourseOrderService {
     //创建订单
     String creatOrder(OrderCreateRequest request,Long userId);
@@ -23,4 +25,7 @@ public interface CourseOrderService {
 
     //检查用户是否购买过课程
     boolean hasPurchased(Long userId,Long courseId);
+
+    //查询订单列表
+    Page<OrderVo> queryOrderList(OrderQueryRequest request);
 }
