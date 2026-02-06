@@ -41,6 +41,7 @@ pipeline {
         stage('构建Docker镜像') {
             steps {
                 sh 'docker build -t ${IMAGE_NAME}:latest .'
+                sh 'docker build -t course-frontend:latest ./frontend-vue'
             }
         }
 
