@@ -1,6 +1,6 @@
 # 第一阶段：编译 (build-stage)
 # 使用 Node 镜像进行打包，给它起个别名叫 build-stage
-FROM node:18-alpine AS build-stage
+FROM node:20-alpine AS build-stage
 
 WORKDIR /app
 
