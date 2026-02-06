@@ -9,7 +9,7 @@ pipeline {
 
         stage('拉取代码') {
             steps {
-                git 'https://github.com/innnx/course-mage.git'
+                checkout scm
             }
         }
 
