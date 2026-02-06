@@ -18,7 +18,7 @@ pipeline {
             steps {
                 sh 'chmod +x mvnw'
                 sh 'java -version'
-                sh 'mvn -version'
+                sh './mvnw -version'
             }
         }
 
