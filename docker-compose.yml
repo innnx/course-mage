@@ -4,19 +4,31 @@ services:
   #Mysql数据库
   mysql:
     image: mysql:8.0
-    container_name: course-mysql
+    container_name: coursehub-db
     environment:
       MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: course_db
+      MYSQL_DATABASE: coursehub
       TZ: Asia/Shanghai
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - course-network
     command: --default-authentication-plugin=mysql_native_password
+  frontend:
+    image: nginx:alpine
+    container_name: course-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend-vue/dist:/usr/share/nginx/html
+      - ./frontend-vue/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - course-network
 
   # Redis
   redis:
@@ -36,7 +48,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/course_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coursehub?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root123
       SPRING_DATA_REDIS_HOST: redis

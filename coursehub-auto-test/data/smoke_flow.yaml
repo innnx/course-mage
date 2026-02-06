@@ -1,0 +1,9 @@
+- case_name: 正常下单流程_自动化课程
+  username: user_auto
+  nickname: user_auto
+  password: Test1234
+  course_title: 自动化测试课程
+  categoryId: 1
+  price: 99
+  description: 自动化测试课程
+  query_keyword: 自动化测试课程

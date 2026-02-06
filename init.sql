@@ -1,4 +1,4 @@
-USE course_db;
+USE coursehub;
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS `user` (
