@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "course-app"
+        DOCKER_COMPOSE = "/usr/local/bin/docker-compose"
     }
 
     stages {
@@ -13,6 +14,14 @@ pipeline {
             }
         }
 
+        stage('编译环境检查') {
+            steps {
+                sh 'chmod +x mvnw'
+                sh 'java -version'
+                sh 'mvn -version'
+            }
+        }
+
         stage('后端打包') {
             steps {
                 sh 'chmod +x mvnw'
@@ -20,9 +29,18 @@ pipeline {
             }
         }
 
+        stage('前端打包') {
+            steps {
+                dir('frontend-vue') {
+                    // sh 'npm install && npm run build'
+                    echo '跳过前端打包，假设 dist 已存在或已在 Dockerfile 中处理'
+                }
+            }
+        }
+
         stage('构建Docker镜像') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'docker build -t ${IMAGE_NAME}:latest .'
             }
         }
 
@@ -30,6 +48,7 @@ pipeline {
             steps {
                 sh 'docker-compose down'
                 sh 'docker-compose up -d'
+                sh 'docker image prune -f'
             }
         }
 
