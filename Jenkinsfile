@@ -58,9 +58,13 @@ pipeline {
                 dir('coursehub-auto-test') {
                     // 使用 python 镜像运行测试，这样不需要在服务器手动装 python 环境
                     sh '''
+                    # 创建一个名为 python_cache 的 Docker 卷（如果不存在）
+                    docker volume create python_test_cache || true
+
                     docker run --rm --network course-network \
-                        -v $(pwd):/app -w /app \
-                        python:3.10-slim \
+                        -v $(pwd):/app \
+                        -v python_test_cache:/root/.cache/pip \
+                        -w /app python:3.10-slim \
                         sh -c "pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && pytest --env=prod"
                     '''
                 }
