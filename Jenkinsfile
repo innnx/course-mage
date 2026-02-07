@@ -24,7 +24,6 @@ pipeline {
 
         stage('后端打包') {
             steps {
-                sh 'chmod +x mvnw'
                 sh './mvnw clean package -DskipTests'
             }
         }
