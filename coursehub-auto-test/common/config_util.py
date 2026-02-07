@@ -1,6 +1,6 @@
 import yaml
 
-def load_config(env="test"):
+def load_config(env="prod"):
     """
     读取环境配置文件
     作用：支持多环境切换(DEV/SIT/Prod/)

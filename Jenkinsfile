@@ -53,11 +53,26 @@ pipeline {
             }
         }
 
+        stage('自动化接口测试') {
+            steps {
+                dir('coursehub-auto-test') {
+                    // 使用 python 镜像运行测试，这样不需要在服务器手动装 python 环境
+                    sh '''
+                    docker run --rm --network course-network \
+                        -v $(pwd):/app -w /app \
+                        python:3.10-slim \
+                        sh -c "pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && pytest --env=prod"
+                    '''
+                }
+            }
+        }
+
     }
 
     post {
         success {
             echo '部署成功'
+            cleanWs()
         }
         failure {
             echo '部署失败'
