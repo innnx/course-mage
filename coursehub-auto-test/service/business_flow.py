@@ -35,6 +35,7 @@ class BusinessFlow:
     
     # 创建课程并获取id
     def create_course_and_get_id(self,query_keyword,course_title,categoryId,description,price):
+        course_title = f"{course_title}_{int(time.time())}"
         logger.info(f"创建课程:{course_title}")
         self.course_api.create_course(self.base_url,self.token,course_title,categoryId,description,price)
         res = self.course_api.page_query(
