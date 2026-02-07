@@ -58,6 +58,7 @@ pipeline {
                 dir('coursehub-auto-test') {
                     // 使用 python 镜像运行测试，这样不需要在服务器手动装 python 环境
                     sh '''
+                    mkdir -p allure-results
                     # 创建一个名为 python_cache 的 Docker 卷（如果不存在）
                     docker volume create python_test_cache || true
 
@@ -65,7 +66,8 @@ pipeline {
                         -v $(pwd):/app \
                         -v python_test_cache:/root/.cache/pip \
                         -w /app python:3.10-slim \
-                        sh -c "pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && pytest --env=prod"
+                        sh -c "pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && \
+                        pytest --env=prod --alluredir=./allure-results" || true 
                     '''
                 }
             }
@@ -74,6 +76,10 @@ pipeline {
     }
 
     post {
+        always {
+        // 读取 coursehub-auto-test/allure-results 下的数据生成报告
+        allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
+        }
         success {
             echo '部署成功'
             cleanWs()
