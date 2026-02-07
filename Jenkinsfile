@@ -61,7 +61,7 @@ pipeline {
                     # 创建一个名为 python_cache 的 Docker 卷（如果不存在）
                     docker volume create python_test_cache || true
 
-                    docker run --rm --network course-network \
+                    docker run --rm --network coursehub_course-network \
                         -v $(pwd):/app \
                         -v python_test_cache:/root/.cache/pip \
                         -w /app python:3.10-slim \
