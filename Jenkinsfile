@@ -46,8 +46,8 @@ pipeline {
 
         stage('部署服务') {
             steps {
-                sh 'docker-compose down'
-                sh 'docker-compose up -d'
+                sh 'docker compose down'
+                sh 'docker compose up -d'
                 sh 'docker image prune -f'
             }
         }
@@ -77,7 +77,7 @@ pipeline {
     post {
         always {
             // 读取 coursehub-auto-test/allure-results 下的数据生成报告
-            allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
+            // allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
             cleanWs()
         }
         success {
