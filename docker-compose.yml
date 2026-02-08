@@ -5,6 +5,10 @@ services:
   mysql:
     image: mysql:8.0
     container_name: coursehub-db
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_ROOT_HOST: '%'  # 允许远程连接
@@ -14,8 +18,8 @@ services:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      # 注意：init.sql 必须在当前执行 docker-compose 命令的目录下
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # MySQL 会自动运行该目录下所有的 .sql 文件
+      - ./:/docker-entrypoint-initdb.d/
     networks:
       - course-network
     command: --default-authentication-plugin=mysql_native_password

@@ -81,12 +81,8 @@ pipeline {
     }
 
     post {
-        always {
-            // 注意：因为我们映射了物理路径，清理工作区会删除宿主机上的代码
-            //cleanWs()
-            echo '暂保留工作区'
-        }
         success {
+            deleteDir()
             echo '部署成功'
         }
         failure {
