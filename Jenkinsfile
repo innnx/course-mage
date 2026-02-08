@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "course-app"
-        DOCKER_COMPOSE = "/usr/local/bin/docker-compose"
     }
 
     stages {
@@ -46,9 +45,12 @@ pipeline {
 
         stage('部署服务') {
             steps {
-                sh '${DOCKER_COMPOSE} down'
-                sh '${DOCKER_COMPOSE} up -d'
-                sh 'docker image prune -f'
+                sh '''
+                docker compose down || true
+                docker compose up -d
+                docker image prune -f
+                docker ps
+                '''
             }
         }
 
