@@ -76,8 +76,13 @@ pipeline {
 
     post {
         always {
+            // 1. 显式指定使用名为 'allure' 的工具，强制触发下载
             script {
-                tool name: 'allure', type: 'ru.yandex.qatools.allure.jenkins.tools.AllureCommandlineInstallation'            
+                try {
+                    tool name: 'allure', type: 'ru.yandex.qatools.allure.jenkins.tools.AllureCommandlineInstallation'
+                } catch (e) {
+                    echo "等待工具初始化..."
+                }
             }
             // 读取 coursehub-auto-test/allure-results 下的数据生成报告
             allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
