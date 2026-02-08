@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "course-app"
-        DOCKER_COMPOSE = "docker-compose"
+        DOCKER_COMPOSE = "/usr/local/bin/docker-compose"
     }
 
     stages {
