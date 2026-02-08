@@ -24,7 +24,7 @@ pipeline {
 
         stage('后端打包') {
             steps {
-                sh './mvnw clean package -DskipTests'
+                sh './mvnw clean package -DskipTests -s settings.xml'
             }
         }
 
