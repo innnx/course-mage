@@ -3,10 +3,11 @@ pipeline {
 
     environment {
         IMAGE_NAME = "course-app"
+        // 这里的物理路径必须与 docker run 命令中的映射一致
+        HOST_WORKSPACE = "/home/kafka/jenkins_workspace/${JOB_NAME}"
     }
 
     stages {
-
         stage('拉取代码') {
             steps {
                 checkout scm
@@ -27,18 +28,11 @@ pipeline {
             }
         }
 
-        stage('前端打包') {
-            steps {
-                dir('frontend-vue') {
-                    // sh 'npm install && npm run build'
-                    echo '跳过前端打包，假设 dist 已存在或已在 Dockerfile 中处理'
-                }
-            }
-        }
-
         stage('构建Docker镜像') {
             steps {
+                // 构建后端镜像
                 sh 'docker build -t ${IMAGE_NAME}:latest .'
+                // 构建前端镜像 (Dockerfile 会在容器内执行构建，无需宿主机 node)
                 sh 'docker build -t course-frontend:latest ./frontend-vue'
             }
         }
@@ -46,12 +40,20 @@ pipeline {
         stage('部署服务') {
             steps {
                 sh '''
+                # 1. 预防性清理：如果 init.sql 意外变成了文件夹，直接删掉
+                [ -d "init.sql" ] && rm -rf init.sql
+                
+                # 2. 准备 docker-compose
                 if [ ! -f "./docker-compose" ]; then
                     curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
                     chmod +x ./docker-compose
                 fi
+                
+                # 3. 停止并启动服务 (--remove-orphans 确保清理干净)
+                ./docker-compose down --remove-orphans
                 ./docker-compose up -d
-                docker image prune -f
+                
+                # 4. 打印状态
                 docker ps
                 '''
             }
@@ -60,29 +62,36 @@ pipeline {
         stage('自动化接口测试') {
             steps {
                 dir('coursehub-auto-test') {
-                    // 使用 python 镜像运行测试，这样不需要在服务器手动装 python 环境
                     sh '''
-                    rm -rf allure-results && mkdir allure-results
-                    # 创建一个名为 python_cache 的 Docker 卷（如果不存在）
-                    docker volume create python_test_cache || true
+                    # 1. 动态生成测试用的 Dockerfile (解决 requirements.txt 路径问题)
+                    cat <<EOF > Test.Dockerfile
+FROM python:3.10-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+COPY . .
+CMD ["pytest", "--env=prod", "--alluredir=./allure-results"]
+EOF
 
-                    docker run --rm --network coursehub_course-network \
-                        -v $(pwd):/app \
-                        -v python_test_cache:/root/.cache/pip \
-                        -w /app python:3.10-slim \
-                        sh -c "pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple && \
-                        pytest --env=prod --alluredir=./allure-results" || true 
+                    # 2. 构建临时测试镜像
+                    docker build -t course-test-runner -f Test.Dockerfile .
+                    
+                    # 3. 运行测试（将结果映射回宿主机，方便后续查看报告）
+                    rm -rf allure-results && mkdir allure-results
+                    docker run --rm \
+                        --network coursehub_course-network \
+                        -v ${HOST_WORKSPACE}/coursehub-auto-test/allure-results:/app/allure-results \
+                        course-test-runner || true
                     '''
                 }
             }
         }
-
     }
 
     post {
         always {
-            // 读取 coursehub-auto-test/allure-results 下的数据生成报告
-            // allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
+            // 注意：因为我们映射了物理路径，清理工作区会删除宿主机上的代码
+            // 如果你想保留代码方便调试，可以暂时注释掉 cleanWs()
             cleanWs()
         }
         success {
