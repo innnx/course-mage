@@ -10,7 +10,7 @@ services:
       MYSQL_DATABASE: coursehub
       TZ: Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       # 注意：init.sql 必须在当前执行 docker-compose 命令的目录下
