@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "course-app"
-        DOCKER_COMPOSE = "docker compose"
+        DOCKER_COMPOSE = "docker-compose"
     }
 
     stages {
@@ -76,6 +76,9 @@ pipeline {
 
     post {
         always {
+            script {
+            def allureHome = tool 'allure' 
+            }
         // 读取 coursehub-auto-test/allure-results 下的数据生成报告
             allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
             cleanWs()
