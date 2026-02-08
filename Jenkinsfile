@@ -46,8 +46,12 @@ pipeline {
         stage('部署服务') {
             steps {
                 sh '''
-                docker compose down || true
-                docker compose up -d
+                curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
+                chmod +x ./docker-compose
+                
+                // 3. 使用当前目录下的 ./docker-compose 执行命令
+                ./docker-compose down
+                ./docker-compose up -d --build
                 docker image prune -f
                 docker ps
                 '''
