@@ -77,9 +77,9 @@ pipeline {
     post {
         always {
             script {
-            def allureHome = tool 'allure' 
+                tool name: 'allure', type: 'ru.yandex.qatools.allure.jenkins.tools.AllureCommandlineInstallation'            
             }
-        // 读取 coursehub-auto-test/allure-results 下的数据生成报告
+            // 读取 coursehub-auto-test/allure-results 下的数据生成报告
             allure includeProperties: false, jdk: '', results: [[path: 'coursehub-auto-test/allure-results']]
             cleanWs()
         }
