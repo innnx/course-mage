@@ -46,12 +46,11 @@ pipeline {
         stage('部署服务') {
             steps {
                 sh '''
-                curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
-                chmod +x ./docker-compose
-                
-                // 3. 使用当前目录下的 ./docker-compose 执行命令
-                ./docker-compose down
-                ./docker-compose up -d --build
+                if [ ! -f "./docker-compose" ]; then
+                    curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
+                    chmod +x ./docker-compose
+                fi
+                ./docker-compose up -d
                 docker image prune -f
                 docker ps
                 '''
