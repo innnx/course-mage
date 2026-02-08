@@ -46,8 +46,8 @@ pipeline {
 
         stage('部署服务') {
             steps {
-                sh '{DOCKER_COMPOSE} down'
-                sh '{DOCKER_COMPOSE} up -d'
+                sh '${DOCKER_COMPOSE} down'
+                sh '${DOCKER_COMPOSE} up -d'
                 sh 'docker image prune -f'
             }
         }
