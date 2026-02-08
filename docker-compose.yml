@@ -7,6 +7,7 @@ services:
     container_name: coursehub-db
     environment:
       MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_HOST: '%'  # 允许远程连接
       MYSQL_DATABASE: coursehub
       TZ: Asia/Shanghai
     ports:

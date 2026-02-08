@@ -63,24 +63,16 @@ pipeline {
             steps {
                 dir('coursehub-auto-test') {
                     sh '''
-                    # 1. 动态生成测试用的 Dockerfile (解决 requirements.txt 路径问题)
-                    cat <<EOF > Test.Dockerfile
-FROM python:3.10-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-COPY . .
-CMD ["pytest", "--env=prod", "--alluredir=./allure-results"]
-EOF
-
-                    # 2. 构建临时测试镜像
-                    docker build -t course-test-runner -f Test.Dockerfile .
+                    # 直接构建镜像，Docker 会自动寻找目录下的 Dockerfile
+                    docker build -t course-test-runner .
                     
-                    # 3. 运行测试（将结果映射回宿主机，方便后续查看报告）
+                    # 清理并创建结果目录
                     rm -rf allure-results && mkdir allure-results
+                    
+                    # 运行测试
                     docker run --rm \
                         --network coursehub_course-network \
-                        -v ${HOST_WORKSPACE}/coursehub-auto-test/allure-results:/app/allure-results \
+                        -v /home/kafka/jenkins_workspace/coursehub/coursehub-auto-test/allure-results:/app/allure-results \
                         course-test-runner || true
                     '''
                 }
@@ -91,8 +83,8 @@ EOF
     post {
         always {
             // 注意：因为我们映射了物理路径，清理工作区会删除宿主机上的代码
-            // 如果你想保留代码方便调试，可以暂时注释掉 cleanWs()
-            cleanWs()
+            //cleanWs()
+            echo '暂保留工作区'
         }
         success {
             echo '部署成功'
