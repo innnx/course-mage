@@ -52,6 +52,9 @@ pipeline {
                 # 3. 停止并启动服务 (--remove-orphans 确保清理干净)
                 ./docker-compose down --remove-orphans
                 ./docker-compose up -d
+
+                # 清理无效镜像
+                docker image prune -f
                 
                 # 4. 打印状态
                 docker ps
@@ -81,8 +84,10 @@ pipeline {
     }
 
     post {
+        always{
+            cleanWs(patterns: [[pattern: 'target/**', type: 'INCLUDE']])
+        }
         success {
-            deleteDir()
             echo '部署成功'
         }
         failure {

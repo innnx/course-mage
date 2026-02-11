@@ -17,7 +17,7 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - coursehub_mysql-data:/var/lib/mysql
       # MySQL 会自动运行该目录下所有的 .sql 文件
       - ./:/docker-entrypoint-initdb.d/
     networks:
