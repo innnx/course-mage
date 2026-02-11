@@ -19,6 +19,7 @@ pipeline {
                 sh 'chmod +x mvnw'
                 sh 'java -version'
                 sh './mvnw -version'
+                sh 'docker compose version || docker-compose version'
             }
         }
 
