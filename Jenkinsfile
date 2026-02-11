@@ -40,23 +40,18 @@ pipeline {
         stage('部署服务') {
             steps {
                 sh '''
-                # 1. 预防性清理：如果 init.sql 意外变成了文件夹，直接删掉
-                [ -d "init.sql" ] && rm -rf init.sql
-                
-                # 2. 准备 docker-compose
-                if [ ! -f "./docker-compose" ]; then
-                    curl -L "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
-                    chmod +x ./docker-compose
-                fi
-                
-                # 3. 停止并启动服务 (--remove-orphans 确保清理干净)
-                ./docker-compose down --remove-orphans
-                ./docker-compose up -d
+                # 1. 预检语法
+                docker-compose config -q
+        
+                # 2. 停止并清理
+                docker-compose down --remove-orphans
+        
+                # 3. 启动服务
+                docker-compose up -d
 
                 # 清理无效镜像
                 docker image prune -f
                 
-                # 4. 打印状态
                 docker ps
                 '''
             }
