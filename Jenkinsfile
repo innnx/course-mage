@@ -42,13 +42,13 @@ pipeline {
             steps {
                 sh '''
                 # 1. 预检语法
-                docker-compose config -q
+                docker compose config -q
         
                 # 2. 停止并清理
-                docker-compose down --remove-orphans
+                docker compose down --remove-orphans
         
                 # 3. 启动服务
-                docker-compose up -d
+                docker compose up -d
 
                 # 清理无效镜像
                 docker image prune -f
