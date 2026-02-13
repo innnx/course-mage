@@ -62,6 +62,8 @@ pipeline {
             steps {
                 dir('coursehub-auto-test') {
                     sh '''
+                    echo "等待后端服务启动..."
+                    sleep 30
                     # 直接构建镜像，Docker 会自动寻找目录下的 Dockerfile
                     docker build -t course-test-runner .
                     
@@ -70,7 +72,7 @@ pipeline {
                     
                     # 运行测试
                     docker run --rm \
-                        --network coursehub_course-network \
+                        --network course-network \
                         -v /home/kafka/jenkins_workspace/coursehub/coursehub-auto-test/allure-results:/app/allure-results \
                         course-test-runner || true
                     '''
