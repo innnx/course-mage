@@ -64,15 +64,18 @@ pipeline {
                     sh '''
                     echo "等待后端服务启动..."
                     sleep 30
-                    # 直接构建镜像，Docker 会自动寻找目录下的 Dockerfile
+                    # 直接构建镜像,Docker 会自动寻找目录下的 Dockerfile
                     docker build -t course-test-runner .
                     
                     # 清理并创建结果目录
                     rm -rf allure-results && mkdir allure-results
+
+                    NETWORK_NAME=$(docker network ls --filter name=coursehub --format "{{.Name}}" | head -n 1)
+                    if [ -z "$NETWORK_NAME" ]; then NETWORK_NAME="coursehub_course-network"; fi
                     
                     # 运行测试
                     docker run --rm \
-                        --network course-network \
+                        --network $NETWORK_NAME \
                         -v /home/kafka/jenkins_workspace/coursehub/coursehub-auto-test/allure-results:/app/allure-results \
                         course-test-runner || true
                     '''
